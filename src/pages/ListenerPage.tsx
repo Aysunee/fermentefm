@@ -27,6 +27,7 @@ export default function ListenerPage() {
   useEffect(() => {
     const id = setInterval(async () => {
       const next = await fetchActiveBroadcast();
+      if (!next) return; // geçici hata ya da yayın yok — mevcut sesi koru, kesme
       setData((prev) => (signature(prev) === signature(next) ? prev : next));
     }, 30000);
     return () => clearInterval(id);

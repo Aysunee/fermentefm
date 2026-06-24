@@ -116,7 +116,8 @@ export async function renameTrack(id: string, title: string): Promise<void> {
 async function removeFiles(paths: string[]): Promise<void> {
   const clean = paths.filter(Boolean);
   if (clean.length === 0) return;
-  await supabase.storage.from('fermentefm').remove(clean);
+  const { error } = await supabase.storage.from('fermentefm').remove(clean);
+  if (error) console.error('Storage silme hatası:', error.message);
 }
 
 // renumber() çıktısını veritabanına uygula.
