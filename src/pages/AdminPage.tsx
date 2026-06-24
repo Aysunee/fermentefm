@@ -4,9 +4,10 @@ import {
   listBroadcasts, uploadAudio, createSingleBroadcast,
   createPlaylistBroadcast, setActiveBroadcast,
   renameBroadcast, deleteBroadcast,
+  getTracks, renameTrack, deleteTrack, addTracks,
 } from '../lib/radioData';
 import { readAudioDuration } from '../lib/audioDuration';
-import type { Broadcast } from '../lib/types';
+import type { Broadcast, Track } from '../lib/types';
 
 export default function AdminPage() {
   const [email, setEmail] = useState('');
@@ -24,6 +25,7 @@ export default function AdminPage() {
   // Editing panel state
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
+  const [editTracks, setEditTracks] = useState<Track[]>([]);
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -87,10 +89,11 @@ export default function AdminPage() {
     finally { setBusy(false); }
   }
 
-  function openEditor(b: Broadcast) {
+  async function openEditor(b: Broadcast) {
     if (editingId === b.id) { setEditingId(null); return; }
     setEditingId(b.id);
     setEditName(b.name);
+    setEditTracks(b.type === 'playlist' ? await getTracks(b.id) : []);
   }
 
   async function saveName(b: Broadcast) {
@@ -105,6 +108,42 @@ export default function AdminPage() {
     setBusy(true);
     try { await deleteBroadcast(b); setEditingId(null); await refresh(); setMsg('Yayın silindi ✓'); }
     catch (err) { setMsg('Hata: ' + (err as Error).message); }
+    finally { setBusy(false); }
+  }
+
+  async function reloadTracks(broadcastId: string) {
+    setEditTracks(await getTracks(broadcastId));
+  }
+
+  async function saveTrackTitle(track: Track, title: string) {
+    setBusy(true);
+    try { await renameTrack(track.id, title); await reloadTracks(track.broadcast_id); }
+    catch (err) { setMsg('Hata: ' + (err as Error).message); }
+    finally { setBusy(false); }
+  }
+
+  async function removeTrack(track: Track) {
+    if (!window.confirm(`"${track.title}" şarkısı kalıcı silinecek. Emin misin?`)) return;
+    setBusy(true);
+    try { await deleteTrack(track); await reloadTracks(track.broadcast_id); setMsg('Şarkı silindi ✓'); }
+    catch (err) { setMsg('Hata: ' + (err as Error).message); }
+    finally { setBusy(false); }
+  }
+
+  async function addTracksToList(broadcastId: string, newFiles: File[]) {
+    if (newFiles.length === 0) return;
+    setBusy(true); setMsg('Yükleniyor…');
+    try {
+      const items = [];
+      for (const f of newFiles) {
+        const duration = await readAudioDuration(f);
+        const filePath = await uploadAudio(f);
+        items.push({ filePath, title: f.name.replace(/\.[^.]+$/, ''), duration });
+      }
+      await addTracks(broadcastId, items);
+      await reloadTracks(broadcastId);
+      setMsg('Şarkı(lar) eklendi ✓');
+    } catch (err) { setMsg('Hata: ' + (err as Error).message); }
     finally { setBusy(false); }
   }
 
@@ -181,6 +220,32 @@ export default function AdminPage() {
                     <input value={editName} onChange={(e) => setEditName(e.target.value)} />
                     <button onClick={() => saveName(b)} disabled={busy}>Kaydet</button>
                   </div>
+                  {b.type === 'playlist' && (
+                    <div className="track-mgr">
+                      <ul className="track-list">
+                        {editTracks.map((t) => (
+                          <li key={t.id} className="track-row">
+                            <span className="drag-handle">≡</span>
+                            <input
+                              className="track-title"
+                              defaultValue={t.title}
+                              onBlur={(e) => {
+                                if (e.target.value !== t.title) saveTrackTitle(t, e.target.value);
+                              }}
+                            />
+                            <button className="track-del" onClick={() => removeTrack(t)} disabled={busy}>×</button>
+                          </li>
+                        ))}
+                      </ul>
+                      <label className="add-track">
+                        Şarkı ekle
+                        <input
+                          type="file" accept="audio/*" multiple
+                          onChange={(e) => addTracksToList(b.id, Array.from(e.target.files ?? []))}
+                        />
+                      </label>
+                    </div>
+                  )}
                   <button className="danger" onClick={() => removeBroadcast(b)} disabled={busy}>
                     Yayını sil
                   </button>
