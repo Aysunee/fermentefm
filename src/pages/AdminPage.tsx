@@ -4,10 +4,41 @@ import {
   listBroadcasts, uploadAudio, createSingleBroadcast,
   createPlaylistBroadcast, setActiveBroadcast,
   renameBroadcast, deleteBroadcast,
-  getTracks, renameTrack, deleteTrack, addTracks,
+  getTracks, renameTrack, deleteTrack, addTracks, reorderTracks,
 } from '../lib/radioData';
 import { readAudioDuration } from '../lib/audioDuration';
 import type { Broadcast, Track } from '../lib/types';
+import {
+  DndContext, closestCenter, PointerSensor, TouchSensor,
+  useSensor, useSensors, type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext, verticalListSortingStrategy, useSortable, arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
+function SortableTrack({
+  track, busy, onRename, onDelete,
+}: {
+  track: Track;
+  busy: boolean;
+  onRename: (t: Track, title: string) => void;
+  onDelete: (t: Track) => void;
+}) {
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id: track.id });
+  const style = { transform: CSS.Transform.toString(transform), transition };
+  return (
+    <li ref={setNodeRef} style={style} className="track-row">
+      <span className="drag-handle" {...attributes} {...listeners}>≡</span>
+      <input
+        className="track-title"
+        defaultValue={track.title}
+        onBlur={(e) => { if (e.target.value !== track.title) onRename(track, e.target.value); }}
+      />
+      <button className="track-del" onClick={() => onDelete(track)} disabled={busy}>×</button>
+    </li>
+  );
+}
 
 export default function AdminPage() {
   const [email, setEmail] = useState('');
@@ -26,6 +57,21 @@ export default function AdminPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editName, setEditName] = useState('');
   const [editTracks, setEditTracks] = useState<Track[]>([]);
+
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(TouchSensor));
+
+  async function onDragEnd(event: DragEndEvent, broadcastId: string) {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+    const oldIndex = editTracks.findIndex((t) => t.id === active.id);
+    const newIndex = editTracks.findIndex((t) => t.id === over.id);
+    const next = arrayMove(editTracks, oldIndex, newIndex);
+    setEditTracks(next); // anında ekranda göster
+    setBusy(true);
+    try { await reorderTracks(next); }
+    catch (err) { setMsg('Hata: ' + (err as Error).message); await reloadTracks(broadcastId); }
+    finally { setBusy(false); }
+  }
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -222,21 +268,28 @@ export default function AdminPage() {
                   </div>
                   {b.type === 'playlist' && (
                     <div className="track-mgr">
-                      <ul className="track-list">
-                        {editTracks.map((t) => (
-                          <li key={t.id} className="track-row">
-                            <span className="drag-handle">≡</span>
-                            <input
-                              className="track-title"
-                              defaultValue={t.title}
-                              onBlur={(e) => {
-                                if (e.target.value !== t.title) saveTrackTitle(t, e.target.value);
-                              }}
-                            />
-                            <button className="track-del" onClick={() => removeTrack(t)} disabled={busy}>×</button>
-                          </li>
-                        ))}
-                      </ul>
+                      <DndContext
+                        sensors={sensors}
+                        collisionDetection={closestCenter}
+                        onDragEnd={(e) => onDragEnd(e, b.id)}
+                      >
+                        <SortableContext
+                          items={editTracks.map((t) => t.id)}
+                          strategy={verticalListSortingStrategy}
+                        >
+                          <ul className="track-list">
+                            {editTracks.map((t) => (
+                              <SortableTrack
+                                key={t.id}
+                                track={t}
+                                busy={busy}
+                                onRename={saveTrackTitle}
+                                onDelete={removeTrack}
+                              />
+                            ))}
+                          </ul>
+                        </SortableContext>
+                      </DndContext>
                       <label className="add-track">
                         Şarkı ekle
                         <input
