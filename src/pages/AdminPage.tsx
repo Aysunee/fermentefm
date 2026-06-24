@@ -3,6 +3,7 @@ import { supabase, ADMIN_EMAIL } from '../lib/supabase';
 import {
   listBroadcasts, uploadAudio, createSingleBroadcast,
   createPlaylistBroadcast, setActiveBroadcast,
+  renameBroadcast, deleteBroadcast,
 } from '../lib/radioData';
 import { readAudioDuration } from '../lib/audioDuration';
 import type { Broadcast } from '../lib/types';
@@ -19,6 +20,10 @@ export default function AdminPage() {
   const [mode, setMode] = useState<'single' | 'playlist'>('single');
   const [name, setName] = useState('');
   const [files, setFiles] = useState<File[]>([]);
+
+  // Editing panel state
+  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editName, setEditName] = useState('');
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -82,6 +87,27 @@ export default function AdminPage() {
     finally { setBusy(false); }
   }
 
+  function openEditor(b: Broadcast) {
+    if (editingId === b.id) { setEditingId(null); return; }
+    setEditingId(b.id);
+    setEditName(b.name);
+  }
+
+  async function saveName(b: Broadcast) {
+    setBusy(true);
+    try { await renameBroadcast(b.id, editName); await refresh(); setMsg('Ad güncellendi ✓'); }
+    catch (err) { setMsg('Hata: ' + (err as Error).message); }
+    finally { setBusy(false); }
+  }
+
+  async function removeBroadcast(b: Broadcast) {
+    if (!window.confirm(`"${b.name}" yayını ve tüm şarkıları kalıcı silinecek. Emin misin?`)) return;
+    setBusy(true);
+    try { await deleteBroadcast(b); setEditingId(null); await refresh(); setMsg('Yayın silindi ✓'); }
+    catch (err) { setMsg('Hata: ' + (err as Error).message); }
+    finally { setBusy(false); }
+  }
+
   if (authed === null) return <div className="admin"><p>Yükleniyor…</p></div>;
 
   if (!authed) {
@@ -136,11 +162,30 @@ export default function AdminPage() {
         {broadcasts.length === 0 && <p>Henüz yayın yok.</p>}
         <ul className="bc-list">
           {broadcasts.map((b) => (
-            <li key={b.id}>
-              <span>{b.name} <em>({b.type === 'single' ? 'tek dosya' : 'liste'})</em></span>
-              {b.is_active
-                ? <span className="active-tag">● Aktif</span>
-                : <button onClick={() => activate(b.id)} disabled={busy}>Aktif yap</button>}
+            <li key={b.id} className="bc-item">
+              <div className="bc-row">
+                <span>{b.name} <em>({b.type === 'single' ? 'tek dosya' : 'liste'})</em></span>
+                <div className="bc-actions">
+                  {b.is_active
+                    ? <span className="active-tag">● Aktif</span>
+                    : <button onClick={() => activate(b.id)} disabled={busy}>Aktif yap</button>}
+                  <button onClick={() => openEditor(b)} disabled={busy}>
+                    {editingId === b.id ? 'Kapat' : 'Düzenle'}
+                  </button>
+                </div>
+              </div>
+
+              {editingId === b.id && (
+                <div className="bc-editor">
+                  <div className="edit-name">
+                    <input value={editName} onChange={(e) => setEditName(e.target.value)} />
+                    <button onClick={() => saveName(b)} disabled={busy}>Kaydet</button>
+                  </div>
+                  <button className="danger" onClick={() => removeBroadcast(b)} disabled={busy}>
+                    Yayını sil
+                  </button>
+                </div>
+              )}
             </li>
           ))}
         </ul>

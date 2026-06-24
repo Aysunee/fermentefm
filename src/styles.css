@@ -153,3 +153,18 @@ body {
   font-size: 10px; background: #1a1a1a; color: #fff;
   padding: 2px 8px; border-radius: 0; letter-spacing: 1px; text-transform: uppercase;
 }
+
+/* ---- Admin: editing panel ---- */
+.bc-item { flex-direction: column; align-items: stretch; }
+.bc-row { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.bc-actions { display: flex; gap: 8px; align-items: center; }
+.bc-editor {
+  display: flex; flex-direction: column; gap: 12px;
+  padding: 14px 0 4px; margin-top: 10px; border-top: 1px solid #ececec;
+}
+.edit-name { display: flex; gap: 8px; }
+.edit-name input { flex: 1; padding: 8px; border: 1px solid #c8c8c8; }
+.bc-editor button.danger {
+  align-self: flex-start; background: #c8392b; border-color: #c8392b; color: #fff;
+}
+.bc-editor button.danger:hover { background: #fff; color: #c8392b; }
