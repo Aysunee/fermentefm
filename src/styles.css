@@ -3,7 +3,7 @@ body {
   margin: 0;
   font-family: 'Georgia', 'Times New Roman', serif;
   color: #1a1a1a;
-  background: #ffffff;
+  background: #f3efe4;
 }
 .sans {
   font-family: system-ui, -apple-system, sans-serif;
@@ -12,29 +12,26 @@ body {
 /* ---------- Listener (radio) ---------- */
 .radio {
   min-height: 100vh;
-  background: #ffffff;
+  background: #f3efe4;
   display: flex; flex-direction: column; align-items: center;
   padding: 24px;
 }
 
-/* top bar: bordered logo box left, live badge right — like the site header */
+/* top bar: live badge — like the site header */
 .radio-header {
   width: 100%; max-width: 720px;
-  display: flex; justify-content: space-between; align-items: center;
-  padding-bottom: 18px; margin-bottom: 8px;
-  border-bottom: 1px solid #1a1a1a;
+  display: flex; justify-content: flex-end; align-items: center;
+  padding-bottom: 14px;
 }
-.header-logo {
-  display: flex; align-items: center; gap: 12px;
+
+/* vintage Fermenté Radio hero illustration */
+.radio-hero {
+  width: 100%; max-width: 640px;
+  margin: 4px auto 0;
 }
-.logo-box {
-  border: 1px solid #1a1a1a; padding: 6px;
-  display: flex; align-items: center; justify-content: center;
-}
-.logo-box img { height: 44px; width: auto; display: block; mix-blend-mode: multiply; }
-.header-title {
-  font-family: system-ui, sans-serif;
-  font-size: 13px; letter-spacing: 4px; text-transform: uppercase; color: #1a1a1a;
+.radio-hero img {
+  width: 100%; height: auto; display: block;
+  mix-blend-mode: multiply;
 }
 .live {
   display: flex; align-items: center; gap: 8px;
