@@ -73,30 +73,28 @@ export default function ListenerPage() {
         <span className="live"><span className="dot" /> Canlı Yayın</span>
       </header>
 
-      <div className="radio-hero">
-        <img src="/fermente-radio.png" alt="Fermenté Radio" />
-      </div>
-
       {!loaded && <p className="status">Yükleniyor…</p>}
       {loaded && !data && <p className="status">Yayın yakında 🎧</p>}
 
       {loaded && data && (
         <main className="player">
-          <button
-            className="play-btn"
-            onClick={playing ? handleStop : handlePlay}
-            aria-label={playing ? 'Durdur' : 'Çal'}
-          >
-            {playing ? '❚❚' : '►'}
-          </button>
-          <p className="now-label">Şimdi çalıyor</p>
-          <p className="now-title">{title || data.broadcast.name}</p>
-          <input
-            className="volume"
-            type="range" min={0} max={1} step={0.01}
-            value={volume}
-            onChange={(e) => setVolume(parseFloat(e.target.value))}
-          />
+          <div className="player-controls">
+            <button
+              className="play-btn"
+              onClick={playing ? handleStop : handlePlay}
+              aria-label={playing ? 'Durdur' : 'Çal'}
+            >
+              {playing ? '❚❚' : '►'}
+            </button>
+            <p className="now-label">Şimdi çalıyor</p>
+            <p className="now-title">{title || data.broadcast.name}</p>
+            <input
+              className="volume"
+              type="range" min={0} max={1} step={0.01}
+              value={volume}
+              onChange={(e) => setVolume(parseFloat(e.target.value))}
+            />
+          </div>
         </main>
       )}
 
