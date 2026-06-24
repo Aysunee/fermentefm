@@ -4,7 +4,7 @@ import {
   listBroadcasts, uploadAudio, createSingleBroadcast,
   createPlaylistBroadcast, setActiveBroadcast,
   renameBroadcast, deleteBroadcast,
-  getTracks, renameTrack, deleteTrack, addTracks, reorderTracks,
+  getTracks, renameTrack, deleteTrack, addTracks, reorderTracks, replaceSingleFile,
 } from '../lib/radioData';
 import { readAudioDuration } from '../lib/audioDuration';
 import type { Broadcast, Track } from '../lib/types';
@@ -193,6 +193,19 @@ export default function AdminPage() {
     finally { setBusy(false); }
   }
 
+  async function replaceFile(b: Broadcast, newFile: File | undefined) {
+    if (!newFile) return;
+    setBusy(true); setMsg('Yükleniyor…');
+    try {
+      const duration = await readAudioDuration(newFile);
+      const filePath = await uploadAudio(newFile);
+      await replaceSingleFile(b, filePath, duration);
+      await refresh();
+      setMsg('Dosya değiştirildi ✓');
+    } catch (err) { setMsg('Hata: ' + (err as Error).message); }
+    finally { setBusy(false); }
+  }
+
   if (authed === null) return <div className="admin"><p>Yükleniyor…</p></div>;
 
   if (!authed) {
@@ -298,6 +311,15 @@ export default function AdminPage() {
                         />
                       </label>
                     </div>
+                  )}
+                  {b.type === 'single' && (
+                    <label className="add-track">
+                      Dosyayı değiştir
+                      <input
+                        type="file" accept="audio/*"
+                        onChange={(e) => replaceFile(b, e.target.files?.[0])}
+                      />
+                    </label>
                   )}
                   <button className="danger" onClick={() => removeBroadcast(b)} disabled={busy}>
                     Yayını sil
