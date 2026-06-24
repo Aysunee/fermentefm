@@ -87,7 +87,10 @@ export default function AdminPage() {
   if (!authed) {
     return (
       <div className="admin">
-        <h1>FermenteFM Yönetim</h1>
+        <div className="admin-brand">
+          <img className="admin-logo" src="/fermente-logo.jpeg" alt="Fermenté" />
+          <h1>FermenteFM Yönetim</h1>
+        </div>
         <form className="card" onSubmit={login}>
           <input placeholder="E-posta" value={email} onChange={(e) => setEmail(e.target.value)} />
           <input placeholder="Şifre" type="password" value={pw} onChange={(e) => setPw(e.target.value)} />
@@ -101,7 +104,10 @@ export default function AdminPage() {
   return (
     <div className="admin">
       <div className="admin-top">
-        <h1>FermenteFM Yönetim</h1>
+        <div className="admin-brand">
+          <img className="admin-logo" src="/fermente-logo.jpeg" alt="Fermenté" />
+          <h1>FermenteFM Yönetim</h1>
+        </div>
         <button onClick={logout}>Çıkış</button>
       </div>
 
