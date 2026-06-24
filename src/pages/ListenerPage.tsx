@@ -70,13 +70,14 @@ export default function ListenerPage() {
   return (
     <div className="radio">
       <header className="radio-header">
+        <div className="header-logo">
+          <span className="logo-box">
+            <img src="/fermente-logo.jpeg" alt="Fermenté Baking Co." />
+          </span>
+          <span className="header-title">Radyo</span>
+        </div>
         <span className="live"><span className="dot" /> Canlı Yayın</span>
       </header>
-
-      <div className="brand">
-        <img className="brand-logo" src="/fermente-logo.jpeg" alt="Fermenté Baking Co." />
-        <span className="brand-fm">R A D Y O</span>
-      </div>
 
       {!loaded && <p className="status">Yükleniyor…</p>}
       {loaded && !data && <p className="status">Yayın yakında 🎧</p>}

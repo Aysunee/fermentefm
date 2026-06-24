@@ -88,7 +88,9 @@ export default function AdminPage() {
     return (
       <div className="admin">
         <div className="admin-brand">
-          <img className="admin-logo" src="/fermente-logo.jpeg" alt="Fermenté" />
+          <span className="admin-logo-box">
+            <img className="admin-logo" src="/fermente-logo.jpeg" alt="Fermenté" />
+          </span>
           <h1>FermenteFM Yönetim</h1>
         </div>
         <form className="card" onSubmit={login}>
@@ -105,7 +107,9 @@ export default function AdminPage() {
     <div className="admin">
       <div className="admin-top">
         <div className="admin-brand">
-          <img className="admin-logo" src="/fermente-logo.jpeg" alt="Fermenté" />
+          <span className="admin-logo-box">
+            <img className="admin-logo" src="/fermente-logo.jpeg" alt="Fermenté" />
+          </span>
           <h1>FermenteFM Yönetim</h1>
         </div>
         <button onClick={logout}>Çıkış</button>
