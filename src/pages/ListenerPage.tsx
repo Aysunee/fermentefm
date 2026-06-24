@@ -4,6 +4,12 @@ import { getNowPlaying } from '../lib/radioEngine';
 import { audioUrl } from '../lib/supabase';
 import type { Broadcast, Track } from '../lib/types';
 
+function signature(d: { broadcast: Broadcast; tracks: Track[] } | null): string {
+  if (!d) return 'none';
+  const t = d.tracks.map((x) => `${x.id}:${x.position}:${x.title}:${x.file_path}`).join('|');
+  return `${d.broadcast.id}:${d.broadcast.name}:${d.broadcast.single_file_path}:${t}`;
+}
+
 export default function ListenerPage() {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [data, setData] = useState<{ broadcast: Broadcast; tracks: Track[] } | null>(null);
@@ -15,6 +21,15 @@ export default function ListenerPage() {
 
   useEffect(() => {
     fetchActiveBroadcast().then((d) => { setData(d); setLoaded(true); });
+  }, []);
+
+  // Aktif yayın admin tarafından düzenlenirse, içerik değişmişse otomatik güncelle.
+  useEffect(() => {
+    const id = setInterval(async () => {
+      const next = await fetchActiveBroadcast();
+      setData((prev) => (signature(prev) === signature(next) ? prev : next));
+    }, 30000);
+    return () => clearInterval(id);
   }, []);
 
   // Sync the audio element to the wall clock.
