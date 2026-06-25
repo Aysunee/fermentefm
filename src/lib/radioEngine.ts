@@ -33,3 +33,27 @@ export function getNowPlaying(
   const first = ordered[0];
   return { filePath: first.file_path, title: first.title, offsetSeconds: 0 };
 }
+
+// Title of the track that plays after the current one, or null when there is
+// nothing meaningful to show (single-file loop, empty or single-track playlist).
+export function getUpNext(
+  broadcast: Broadcast,
+  tracks: Track[],
+  epochSeconds: number,
+): string | null {
+  if (broadcast.type === 'single') return null;
+
+  const ordered = [...tracks].sort((a, b) => a.position - b.position);
+  if (ordered.length < 2) return null;
+  const total = ordered.reduce((sum, t) => sum + t.duration_seconds, 0);
+  if (total <= 0) return null;
+
+  let pos = Math.floor(epochSeconds) % total;
+  for (let i = 0; i < ordered.length; i++) {
+    if (pos < ordered[i].duration_seconds) {
+      return ordered[(i + 1) % ordered.length].title;
+    }
+    pos -= ordered[i].duration_seconds;
+  }
+  return ordered[0].title;
+}
