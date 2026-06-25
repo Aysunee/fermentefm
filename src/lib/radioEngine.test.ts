@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { getNowPlaying } from './radioEngine';
+import { getNowPlaying, getUpNext } from './radioEngine';
 import type { Broadcast, Track } from './types';
 
 const single: Broadcast = {
@@ -58,5 +58,33 @@ describe('getNowPlaying - playlist', () => {
     expect(getNowPlaying(playlist, shuffled, 40)).toEqual({
       filePath: 'b.mp3', title: 'B', offsetSeconds: 10,
     });
+  });
+});
+
+describe('getUpNext', () => {
+  it('returns null for single-file broadcast (loops itself)', () => {
+    expect(getUpNext(single, [], 10)).toBeNull();
+  });
+  it('returns the next track while first is playing', () => {
+    // epoch 10 -> track A playing, next is B
+    expect(getUpNext(playlist, tracks, 10)).toBe('B');
+  });
+  it('returns the following track in the middle of the list', () => {
+    // epoch 40 -> track B playing, next is C
+    expect(getUpNext(playlist, tracks, 40)).toBe('C');
+  });
+  it('wraps to the first track while the last is playing', () => {
+    // epoch 70 -> track C playing, next wraps to A
+    expect(getUpNext(playlist, tracks, 70)).toBe('A');
+  });
+  it('orders by position, not array order', () => {
+    const shuffled = [tracks[2], tracks[0], tracks[1]];
+    expect(getUpNext(playlist, shuffled, 40)).toBe('C');
+  });
+  it('returns null when the playlist has a single track', () => {
+    expect(getUpNext(playlist, [tracks[0]], 10)).toBeNull();
+  });
+  it('returns null when there are no playable tracks', () => {
+    expect(getUpNext(playlist, [], 10)).toBeNull();
   });
 });

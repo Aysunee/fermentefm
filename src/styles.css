@@ -37,6 +37,8 @@ body {
   width: 8px; height: 8px; border-radius: 50%; background: #c8392b;
   box-shadow: 0 0 0 0 rgba(200,57,43,.5); animation: pulse 1.6s infinite;
 }
+.live.off { color: #8a8a8a; }
+.live.off .dot { background: #b0b0b0; animation: none; box-shadow: none; }
 @keyframes pulse {
   0%   { box-shadow: 0 0 0 0 rgba(200,57,43,.5); }
   70%  { box-shadow: 0 0 0 7px rgba(200,57,43,0); }
@@ -74,10 +76,41 @@ body {
   margin: 0; font-size: 26px; font-weight: 400; letter-spacing: .5px;
   text-transform: uppercase; color: #1a1a1a;
 }
+.up-next {
+  margin: -4px 0 0; font-family: system-ui, sans-serif;
+  font-size: 12px; letter-spacing: 1px; color: #8a8a8a;
+}
 .volume { width: 240px; max-width: 80vw; accent-color: #1a1a1a; }
+.listener-actions { display: flex; gap: 10px; margin-top: 4px; }
+.listener-actions button {
+  font-family: system-ui, sans-serif;
+  font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase;
+  padding: 8px 16px; border-radius: 0; cursor: pointer; font-weight: 600;
+  border: 1px solid #1a1a1a; background: #1a1a1a; color: #fff;
+  transition: background .15s, color .15s;
+}
+.listener-actions button:hover { background: #fff; color: #1a1a1a; }
+.listener-actions .live-btn { background: #fff; color: #1a1a1a; }
+.listener-actions .live-btn:hover { background: #1a1a1a; color: #fff; }
 .status {
   margin-top: 24vh; font-size: 18px; color: #8a8a8a;
   font-family: system-ui, sans-serif;
+}
+
+/* Mobile: görseli kırpmadan göster, badge'le çakışmasın, kontrolleri ortala */
+@media (max-width: 640px) {
+  .radio {
+    background-size: contain;
+    background-position: center 52px;
+    padding: 16px;
+  }
+  .radio-header { padding-bottom: 0; }
+  .play-btn { width: 88px; height: 88px; font-size: 30px; }
+  .now-title { font-size: 22px; }
+  .player {
+    justify-content: center;
+    padding: 8px 0;
+  }
 }
 .radio-footer {
   width: 100%; max-width: 720px;
