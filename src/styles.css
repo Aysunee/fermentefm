@@ -54,9 +54,6 @@ body {
 .player-controls {
   display: flex; flex-direction: column; align-items: center; gap: 14px;
   padding: 22px 30px 16px;
-  border-radius: 10px;
-  background: rgba(243, 239, 228, 0.86);
-  box-shadow: 0 0 36px 26px rgba(243, 239, 228, 0.86);
 }
 .play-btn {
   width: 112px; height: 112px; border-radius: 50%;
@@ -70,15 +67,18 @@ body {
 .play-btn:active { transform: scale(.96); }
 .now-label {
   margin: 0; font-family: system-ui, sans-serif;
-  font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #8a8a8a;
+  font-size: 11px; letter-spacing: 3px; text-transform: uppercase; color: #6a6a6a;
+  text-shadow: 0 0 6px #f3efe4, 0 0 12px #f3efe4;
 }
 .now-title {
   margin: 0; font-size: 26px; font-weight: 400; letter-spacing: .5px;
   text-transform: uppercase; color: #1a1a1a;
+  text-shadow: 0 0 8px #f3efe4, 0 0 16px #f3efe4;
 }
 .up-next {
   margin: -4px 0 0; font-family: system-ui, sans-serif;
-  font-size: 12px; letter-spacing: 1px; color: #8a8a8a;
+  font-size: 12px; letter-spacing: 1px; color: #6a6a6a;
+  text-shadow: 0 0 6px #f3efe4, 0 0 12px #f3efe4;
 }
 .volume { width: 240px; max-width: 80vw; accent-color: #1a1a1a; }
 .listener-actions { display: flex; gap: 10px; margin-top: 4px; }
